@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique de confidentialité — RIptv</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0 auto; max-width:46rem; padding:2rem 1.25rem 4rem;
+         font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  h1 { font-size:1.6rem; line-height:1.25; margin:0 0 .25rem; }
+  h2 { font-size:1.15rem; margin:2rem 0 .5rem; }
+  h3 { font-size:1rem; margin:1.5rem 0 .4rem; }
+  table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.94rem; }
+  th,td { border:1px solid #8886; padding:.5rem .6rem; text-align:left; vertical-align:top; }
+  code { font-size:.92em; padding:.1em .3em; border-radius:4px; background:#8881; }
+  em.date { display:block; opacity:.7; margin-bottom:1.5rem; font-style:normal; font-size:.92rem; }
+  hr { border:0; border-top:1px solid #8886; margin:2.5rem 0 1.5rem; }
+  nav { margin-bottom:2rem; font-size:.94rem; }
+</style>
+</head>
+<body>
+<nav><a href="./">RIptv</a> · <a href="confidentialite.html">Confidentialité</a> · <a href="conditions.html">Conditions d'utilisation</a></nav>
+<h1>Politique de confidentialité — RIptv</h1>
+
+<em class="date">Dernière mise à jour : 11 septembre 2026</em>
+
+<h2>En une phrase</h2>
+
+<p><strong>RIptv ne collecte aucune donnée.</strong> L&#x27;application n&#x27;a pas de serveur, pas de compte à créer, pas de statistiques d&#x27;usage, pas de publicité et pas de traceur. Tout ce que vous faites dans l&#x27;application reste sur votre appareil, ou dans votre propre Google Drive si vous choisissez la sauvegarde.</p>
+
+<h2>Qui édite cette application</h2>
+
+<p>RIptv est une application personnelle, distribuée gratuitement à un cercle privé. Aucune société ne l&#x27;exploite et aucune donnée n&#x27;est revendue, partagée ou monétisée.</p>
+
+<p>Contact : riptvpremium@gmail.com</p>
+
+<h2>Ce qui est enregistré sur votre appareil</h2>
+
+<p>L&#x27;application enregistre localement ce dont elle a besoin pour fonctionner :</p>
+
+<ul>
+<li>vos <strong>profils</strong> et leurs réglages, ainsi que le code du contrôle parental ;</li>
+<li>les <strong>sources</strong> que vous ajoutez, avec leurs identifiants de connexion ;</li>
+<li>vos <strong>favoris</strong>, votre <strong>reprise de lecture</strong>, les <strong>épisodes vus</strong>, vos catégories masquées ou</li>
+<p>  réorganisées, vos renommages et vos corrections de fiches ;</p>
+<li>le <strong>catalogue</strong> et le <strong>guide TV</strong> en cache, qui se reconstruisent seuls ;</li>
+<li>vos <strong>téléchargements</strong>, s&#x27;il y en a.</li>
+</ul>
+
+<p>Les <strong>mots de passe et identifiants sont chiffrés</strong> avant d&#x27;être enregistrés, au moyen du coffre sécurisé d&#x27;Android (Android Keystore). La clé de chiffrement ne quitte jamais l&#x27;appareil et n&#x27;est pas récupérable ailleurs.</p>
+
+<h2>La sauvegarde dans votre Google Drive (facultative)</h2>
+
+<p>Si — et seulement si — vous liez un compte Google, l&#x27;application dépose <strong>un seul fichier</strong>, nommé <code>RIptv-synchro.json</code>, <strong>dans votre propre Google Drive</strong>. Il sert à retrouver vos favoris et votre progression sur vos autres appareils.</p>
+
+<p>Points importants :</p>
+
+<ul>
+<li>L&#x27;autorisation demandée est la plus étroite que Google propose (<code>drive.file</code>) : l&#x27;application</li>
+<p>  n&#x27;accède <strong>qu&#x27;au fichier qu&#x27;elle a créé elle-même</strong>. Vos photos, vos documents et le reste de   votre Drive lui sont invisibles.</p>
+<li>Ce fichier est <strong>dans votre compte</strong>, pas dans celui de l&#x27;éditeur ni dans celui d&#x27;un autre</li>
+<p>  utilisateur. Personne d&#x27;autre que vous n&#x27;y a accès.</p>
+<li>Il contient les éléments listés plus haut, <strong>y compris les identifiants de vos sources</strong>. Il est</li>
+<p>  transmis par liaison chiffrée (HTTPS) et protégé par votre compte Google.</p>
+<li><strong>Ne pas lier de compte est un choix parfaitement valable</strong> : toute l&#x27;application fonctionne sans,</li>
+<p>  seule la synchronisation est alors indisponible.</p>
+</ul>
+
+<h3>Retirer l&#x27;accès et effacer la sauvegarde</h3>
+
+<ul>
+<li>Dans l&#x27;application : <strong>Réglages ▸ Synchronisation ▸ Délier ce compte</strong>.</li>
+<li>Pour effacer la sauvegarde : supprimez le fichier <code>RIptv-synchro.json</code> de votre Google Drive.</li>
+<li>Pour révoquer l&#x27;autorisation : **myaccount.google.com ▸ Sécurité ▸ Vos connexions à des</li>
+<p>  applications tierces**.</p>
+<li>Désinstaller l&#x27;application efface toutes les données locales.</li>
+</ul>
+
+<h2>Les services que l&#x27;application contacte</h2>
+
+<p>Uniquement ceux que vous configurez, et uniquement pour la fonction concernée :</p>
+
+<table><tr><th>Service</th><th>Quand</th><th>Ce qui est envoyé</th></tr>
+<tr><td><strong>Votre fournisseur IPTV</strong></td><td>lecture et catalogue</td><td>vos identifiants, tels que vous les avez saisis</td></tr>
+<tr><td><strong>Votre serveur local</strong> (Emby, partage HTTP, WebDAV)</td><td>si vous en configurez un</td><td>vos identifiants</td></tr>
+<tr><td><strong>Google Drive</strong></td><td>si vous liez un compte</td><td>le fichier de sauvegarde</td></tr>
+<tr><td><strong>TMDB</strong> et <strong>OMDb</strong></td><td>affiches et résumés</td><td>le titre recherché, avec <strong>votre</strong> clé d&#x27;API</td></tr>
+<tr><td><strong>YouTube</strong></td><td>bandes-annonces</td><td>la référence de la vidéo</td></tr>
+<tr><td><strong>DNS sécurisé</strong> (Google ou Cloudflare)</td><td>seulement si vous l&#x27;activez</td><td>les noms de domaine à résoudre</td></tr>
+</table>
+
+<p>Ces services ont leurs propres politiques de confidentialité, sur lesquelles l&#x27;éditeur de RIptv n&#x27;a aucune prise.</p>
+
+<h2>Enfants et contrôle parental</h2>
+
+<p>Le code du contrôle parental et les restrictions de profil restent sur l&#x27;appareil. Ils ne sont ni transmis ni consultables par l&#x27;éditeur.</p>
+
+<h2>Rapports de plantage</h2>
+
+<p>En cas de plantage, l&#x27;application peut vous proposer d&#x27;envoyer un rapport. Cet envoi **n&#x27;a jamais lieu sans votre geste**, il part vers le serveur que vous avez vous-même configuré, et le texte est expurgé de tout identifiant, mot de passe ou adresse authentifiée avant de partir.</p>
+
+<h2>Modifications</h2>
+
+<p>Cette politique peut évoluer si l&#x27;application change. La date en haut de page indique la dernière révision.</p>
+</body>
+</html>
