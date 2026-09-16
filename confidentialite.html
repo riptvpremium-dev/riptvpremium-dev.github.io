@@ -84,7 +84,7 @@
 <table><tr><th>Service</th><th>Quand</th><th>Ce qui est envoyé</th></tr>
 <tr><td><strong>Votre fournisseur IPTV</strong></td><td>lecture et catalogue</td><td>vos identifiants, tels que vous les avez saisis</td></tr>
 <tr><td><strong>Votre serveur local</strong> (Emby, partage HTTP, WebDAV)</td><td>si vous en configurez un</td><td>vos identifiants</td></tr>
-<tr><td><strong>Google Drive</strong></td><td>si vous liez un compte</td><td>le fichier de sauvegarde</td></tr>
+<tr><td><strong>Google Drive</strong></td><td>si vous liez un compte</td><td>le fichier de sauvegarde, et les rapports de plantage que vous choisissez d&#x27;y déposer</td></tr>
 <tr><td><strong>TMDB</strong> et <strong>OMDb</strong></td><td>affiches et résumés</td><td>le titre recherché, avec <strong>votre</strong> clé d&#x27;API</td></tr>
 <tr><td><strong>YouTube</strong></td><td>bandes-annonces</td><td>la référence de la vidéo</td></tr>
 <tr><td><strong>DNS sécurisé</strong> (Google ou Cloudflare)</td><td>seulement si vous l&#x27;activez</td><td>les noms de domaine à résoudre</td></tr>
@@ -99,7 +99,12 @@
 
 <h2>Rapports de plantage</h2>
 
-<p>En cas de plantage, l&#x27;application peut vous proposer d&#x27;envoyer un rapport. Cet envoi **n&#x27;a jamais lieu sans votre geste**, il part vers le serveur que vous avez vous-même configuré, et le texte est expurgé de tout identifiant, mot de passe ou adresse authentifiée avant de partir.</p>
+<p>En cas de plantage, l&#x27;application affiche un rapport au démarrage suivant. Il contient la trace technique de l&#x27;erreur, la version de RIptv et le modèle de l&#x27;appareil, et il est expurgé de tout identifiant, mot de passe ou adresse authentifiée. <strong>Rien n&#x27;est envoyé sans votre geste.</strong> Vous pouvez choisir de :</p>
+<ul>
+<li><strong>le partager</strong> vous-même (mail, messagerie…) ;</li>
+<li><strong>le déposer dans votre Google Drive</strong>, si vous avez lié un compte ;</li>
+<li><strong>l&#x27;envoyer au développeur</strong> : le rapport est déposé dans votre Google Drive, puis partagé en lecture seule avec le compte de l&#x27;application (riptvpremium@gmail.com), qui reçoit un e-mail de Google. Vous pouvez retirer ce partage ou supprimer le fichier depuis votre Drive à tout moment.</li>
+</ul>
 
 <h2>Modifications</h2>
 
