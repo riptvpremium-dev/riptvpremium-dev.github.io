@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Soirée RIptv</title>
+<style>
+  :root {
+    --bg: #f6f6f8; --card: #ffffff; --text: #17171c; --muted: #5d5d6b; --line: #e2e2e8;
+    --accent: #d32f2f; --accent-text: #ffffff; --good: #1e7d3a; --bad: #b3261e;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121216; --card: #1d1d23; --text: #ececf1; --muted: #a2a2b0; --line: #2e2e37;
+      --accent: #ef5350; --accent-text: #ffffff; --good: #5cc97c; --bad: #ff8a80;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 40rem; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+  h1 { font-size: 1.5rem; margin: .2rem 0 .1rem; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 1rem; margin: 1rem 0; }
+  input[type=text] { width: 100%; font: inherit; padding: .7rem .8rem; border-radius: 10px;
+                     border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  button { font: inherit; border: 0; border-radius: 10px; padding: .6rem 1rem; cursor: pointer;
+           background: var(--accent); color: var(--accent-text); }
+  button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: .75rem; align-items: center; }
+  .item { display: flex; gap: .75rem; align-items: center; padding: .6rem 0; border-top: 1px solid var(--line); }
+  .item:first-child { border-top: 0; }
+  .rank { width: 1.6rem; font-weight: 700; text-align: center; }
+  .poster { width: 46px; height: 68px; border-radius: 6px; object-fit: cover; background: var(--line); flex: none; }
+  .grow { flex: 1; min-width: 0; }
+  .title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vote { display: flex; gap: .35rem; }
+  .vote button { padding: .45rem .6rem; background: transparent; color: var(--text); border: 1px solid var(--line); min-width: 3.2rem; }
+  .vote button.on-up { border-color: var(--good); color: var(--good); font-weight: 700; }
+  .vote button.on-down { border-color: var(--bad); color: var(--bad); font-weight: 700; }
+  .notice { padding: .7rem .9rem; border-radius: 10px; background: color-mix(in srgb, var(--accent) 12%, transparent); margin: .8rem 0; }
+  .hidden { display: none; }
+  footer { margin-top: 2rem; }
+</style>
+</head>
+<body>
+<main>
+  <p class="muted">RIptv · soirée commune</p>
+  <h1 id="title">Soirée</h1>
+  <p class="muted" id="status">Connexion…</p>
+
+  <section class="card" id="nameCard">
+    <label for="name"><strong>Ton prénom</strong></label>
+    <p class="muted">Il s'affiche à côté de tes propositions.</p>
+    <div class="row">
+      <input type="text" id="name" maxlength="30" autocomplete="given-name" placeholder="Ton prénom">
+      <button id="saveName">OK</button>
+    </div>
+  </section>
+
+  <div id="notice" class="notice hidden"></div>
+
+  <section class="card" id="proposeCard">
+    <strong>Proposer un film</strong>
+    <p class="muted">Cherche dans les films de l'hôte, puis propose celui qui te plaît.</p>
+    <input type="text" id="search" placeholder="Titre du film" autocomplete="off">
+    <div id="results"></div>
+  </section>
+
+  <section class="card">
+    <strong>Classement</strong>
+    <p class="muted">👍 pour, 👎 contre. La soirée suit ce classement.</p>
+    <div id="list"><p class="muted">Aucune proposition pour l'instant.</p></div>
+  </section>
+
+  <footer class="muted">Les échanges sont chiffrés avec le code de la soirée. Aucun compte n'est nécessaire.</footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>
+(async () => {
+  const BROKERS = ["wss://broker.hivemq.com:8884/mqtt", "wss://broker.emqx.io:8084/mqtt"];
+  const $ = (id) => document.getElementById(id);
+  const [rawCode, token = ""] = decodeURIComponent(location.hash.slice(1)).split(".");
+  const code = (rawCode || "").toUpperCase().replace(/[^2-9A-HJKMNP-Z]/g, "").replace(/(.{3})(?=.)/g, "$1-");
+  if (code.length !== 11) {
+    $("status").textContent = "Lien incomplet : demande à l'hôte de te renvoyer le lien de la soirée.";
+    return;
+  }
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const sha = async (s) => new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(s)));
+  const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  const key = await crypto.subtle.importKey("raw", await sha("riptv-soiree-key|" + code), "AES-GCM", false, ["encrypt", "decrypt"]);
+  const topic = "riptv/s/" + hex(await sha("riptv-soiree-topic|" + code)).slice(0, 32);
+
+  let vid = store.get("riptv-vid");
+  if (!vid) { vid = "w" + hex(crypto.getRandomValues(new Uint8Array(6))); store.set("riptv-vid", vid); }
+  let name = store.get("riptv-name") || "";
+  let seq = Date.now();
+  const seen = new Map();
+  let state = null, mode = "open", allowed = true, hostLiveAt = 0, rid = "";
+
+  // --- Prénom ---
+  $("name").value = name;
+  const askName = () => { $("nameCard").classList.toggle("hidden", !!name); };
+  $("saveName").onclick = () => {
+    name = $("name").value.trim().slice(0, 30);
+    if (!name) return;
+    store.set("riptv-name", name);
+    askName();
+    send({ t: "join" });
+  };
+  askName();
+
+  // --- Chiffrement (identique à RIptv : AES-GCM, IV de 12 octets en tête) ---
+  async function encrypt(obj) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(JSON.stringify(obj))));
+    const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12); return out;
+  }
+  async function decrypt(bytes) {
+    const b = new Uint8Array(bytes);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b.slice(0, 12) }, key, b.slice(12));
+    return JSON.parse(dec.decode(plain));
+  }
+
+  // --- Relais ---
+  const clients = BROKERS.map((url) => {
+    const c = mqtt.connect(url, { clientId: "riptv-" + vid + "-" + Math.random().toString(16).slice(2, 6), reconnectPeriod: 4000, connectTimeout: 10000 });
+    c.on("connect", () => { c.subscribe(topic); send({ t: "join" }); refreshStatus(); });
+    c.on("close", refreshStatus);
+    c.on("message", async (_t, payload, packet) => {
+      let m; try { m = await decrypt(payload); } catch (e) { return; }
+      if (!m.f || m.f === vid) return;
+      const k = m.f + "|" + m.q;
+      if (seen.has(k)) return; seen.set(k, Date.now());
+      if (!packet.retain) hostLiveAt = Date.now();
+      handle(m);
+      refreshStatus();
+    });
+    return c;
+  });
+
+  async function send(obj) {
+    if (!name && obj.t !== "join") return;
+    obj.f = vid; obj.n = name; obj.k = token; obj.q = ++seq;
+    const bytes = await encrypt(obj);
+    clients.forEach((c) => { if (c.connected) c.publish(topic, bytes); });
+  }
+
+  function refreshStatus() {
+    const up = clients.some((c) => c.connected);
+    const live = Date.now() - hostLiveAt < 70000;
+    let s = !up ? "Connexion…" : live ? "Connecté à la soirée." : "L'hôte n'est pas en ligne : RIptv doit être ouvert chez lui pour enregistrer les propositions et les votes.";
+    $("status").textContent = s;
+  }
+  setInterval(refreshStatus, 10000);
+
+  function notice(text) { const n = $("notice"); n.textContent = text; n.classList.toggle("hidden", !text); }
+
+  // --- Messages de l'hôte ---
+  function handle(m) {
+    if (m.to && m.to !== vid) return;
+    if (m.t === "state") { state = m; mode = m.mode; render(); }
+    else if (m.t === "results" && m.rid === rid) renderResults(m.items || []);
+    else if (m.t === "info") { allowed = false; notice(m.msg); render(); }
+    else if (m.t === "closed") { notice("Cette soirée est terminée."); allowed = false; state = { title: "Soirée terminée", items: [] }; render(); }
+  }
+
+  function el(tag, props = {}, ...kids) {
+    const e = document.createElement(tag);
+    Object.entries(props).forEach(([k, v]) => { if (k === "class") e.className = v; else if (k.startsWith("on")) e[k] = v; else e.setAttribute(k, v); });
+    kids.forEach((k) => e.append(k));
+    return e;
+  }
+  function poster(src) {
+    const img = el("img", { class: "poster", alt: "", loading: "lazy" });
+    if (src && /^https?:\/\//.test(src)) img.src = src;
+    return img;
+  }
+
+  function render() {
+    if (!state) return;
+    $("title").textContent = state.title || "Soirée";
+    document.title = (state.title || "Soirée") + " · RIptv";
+    const canAct = allowed && (mode === "open" || token);
+    $("proposeCard").classList.toggle("hidden", !canAct);
+    if (!canAct && mode !== "open" && !token) notice("Seuls les invités de l'hôte proposent et votent. Tu peux suivre le classement.");
+    const list = $("list"); list.innerHTML = "";
+    const items = state.items || [];
+    if (!items.length) { list.append(el("p", { class: "muted" }, "Aucune proposition pour l'instant.")); return; }
+    items.forEach((it, i) => {
+      const votes = it.v || {};
+      const ups = Object.values(votes).filter((v) => v > 0).length;
+      const downs = Object.values(votes).filter((v) => v < 0).length;
+      const mine = votes[vid] || 0;
+      const up = el("button", { "aria-label": "Pour", onclick: () => send({ t: "vote", id: it.id, v: mine === 1 ? 0 : 1 }) }, "👍 " + ups);
+      const down = el("button", { "aria-label": "Contre", onclick: () => send({ t: "vote", id: it.id, v: mine === -1 ? 0 : -1 }) }, "👎 " + downs);
+      if (mine === 1) up.className = "on-up";
+      if (mine === -1) down.className = "on-down";
+      if (!canAct || !name) { up.disabled = true; down.disabled = true; }
+      list.append(el("div", { class: "item" },
+        el("div", { class: "rank" }, String(i + 1)),
+        poster(it.p),
+        el("div", { class: "grow" },
+          el("div", { class: "title" }, it.ti + (it.y ? " (" + it.y + ")" : "")),
+          el("div", { class: "muted" }, "Proposé par " + (it.by || "?"))),
+        el("div", { class: "vote" }, up, down)));
+    });
+  }
+
+  // --- Recherche et proposition ---
+  let timer = 0;
+  $("search").addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = $("search").value.trim();
+    if (q.length < 2) { $("results").innerHTML = ""; return; }
+    timer = setTimeout(() => {
+      if (!name) { notice("Indique d'abord ton prénom."); return; }
+      rid = Math.random().toString(16).slice(2, 10);
+      $("results").innerHTML = "<p class='muted'>Recherche…</p>";
+      send({ t: "search", qy: q, rid });
+    }, 450);
+  });
+  function renderResults(items) {
+    const box = $("results"); box.innerHTML = "";
+    if (!items.length) { box.append(el("p", { class: "muted" }, "Aucun film de ce nom chez l'hôte.")); return; }
+    items.forEach((it) => {
+      const btn = el("button", { onclick: () => { send({ t: "propose", id: it.id }); box.innerHTML = ""; $("search").value = ""; notice("Proposé : " + it.ti + ". Merci !"); setTimeout(() => notice(""), 4000); } }, "Proposer");
+      box.append(el("div", { class: "item" }, poster(it.p),
+        el("div", { class: "grow" }, el("div", { class: "title" }, it.ti + (it.y ? " (" + it.y + ")" : ""))), btn));
+    });
+  }
+})();
+</script>
+</body>
+</html>
