@@ -65,9 +65,9 @@
   <div id="notice" class="notice hidden"></div>
 
   <section class="card" id="proposeCard">
-    <strong>Proposer un film</strong>
-    <p class="muted">Cherche dans les films de l'hôte, puis propose celui qui te plaît.</p>
-    <input type="text" id="search" placeholder="Titre du film" autocomplete="off">
+    <strong>Proposer un film ou une série</strong>
+    <p class="muted">Cherche dans le catalogue de l'hôte, puis propose ce qui te plaît. Pour une série, la soirée lance l'épisode à suivre.</p>
+    <input type="text" id="search" placeholder="Titre" autocomplete="off">
     <div id="results"></div>
   </section>
 
@@ -212,7 +212,7 @@
         poster(it.p),
         el("div", { class: "grow" },
           el("div", { class: "title" }, it.ti + (it.y ? " (" + it.y + ")" : "")),
-          el("div", { class: "muted" }, "Proposé par " + (it.by || "?"))),
+          el("div", { class: "muted" }, (it.s ? "Série · " : "") + "Proposé par " + (it.by || "?"))),
         el("div", { class: "vote" }, up, down)));
     });
   }
@@ -232,11 +232,12 @@
   });
   function renderResults(items) {
     const box = $("results"); box.innerHTML = "";
-    if (!items.length) { box.append(el("p", { class: "muted" }, "Aucun film de ce nom chez l'hôte.")); return; }
+    if (!items.length) { box.append(el("p", { class: "muted" }, "Rien de ce nom chez l'hôte.")); return; }
     items.forEach((it) => {
       const btn = el("button", { onclick: () => { send({ t: "propose", id: it.id }); box.innerHTML = ""; $("search").value = ""; notice("Proposé : " + it.ti + ". Merci !"); setTimeout(() => notice(""), 4000); } }, "Proposer");
       box.append(el("div", { class: "item" }, poster(it.p),
-        el("div", { class: "grow" }, el("div", { class: "title" }, it.ti + (it.y ? " (" + it.y + ")" : ""))), btn));
+        el("div", { class: "grow" }, el("div", { class: "title" }, it.ti + (it.y ? " (" + it.y + ")" : "")),
+          el("div", { class: "muted" }, it.s ? "Série" : "Film")), btn));
     });
   }
 })();
