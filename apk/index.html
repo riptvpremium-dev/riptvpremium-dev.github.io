@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="0; url=https://github.com/riptvpremium-dev/riptvpremium-dev.github.io/releases/latest/download/RipTvPremium.apk">
 <title>Télécharger RIptv</title>
 <style>
   :root { color-scheme: light dark; }
@@ -19,13 +18,37 @@
 </head>
 <body>
 <h1>Télécharger RIptv</h1>
-<p>Le téléchargement de la dernière version (RipTvPremium.apk, environ 95&nbsp;Mo) démarre tout seul.</p>
+<p id="status">Recherche de la dernière version…</p>
 <p>Sinon, choisis ce bouton&nbsp;:</p>
-<p><a class="download" id="download" href="https://github.com/riptvpremium-dev/riptvpremium-dev.github.io/releases/latest/download/RipTvPremium.apk" autofocus>Télécharger RIptv</a></p>
+<p><a class="download" id="download" href="https://github.com/riptvpremium-dev/riptvpremium-dev.github.io/releases/latest" autofocus>Télécharger RIptv</a></p>
 <p class="note">Fichier officiel, publié sur GitHub. <a href="../">RIptv</a></p>
 <script>
-  document.getElementById("download").focus();
-  location.replace("https://github.com/riptvpremium-dev/riptvpremium-dev.github.io/releases/latest/download/RipTvPremium.apk");
+  // Le fichier porte sa version (« RipTvPremium-2.8.3.apk ») : on le cherche dans la dernière publication.
+  // Sans réponse de GitHub, le bouton mène à la page de la dernière publication.
+  var link = document.getElementById("download");
+  var status = document.getElementById("status");
+  link.focus();
+  var api = "https://api.github.com/repos/riptvpremium-dev/riptvpremium-dev.github.io/releases/latest";
+  var done = false;
+  setTimeout(function () {
+    if (!done) { done = true; status.textContent = "Choisis le fichier RipTvPremium (sans « arm ») sur la page qui s'ouvre avec le bouton."; }
+  }, 6000);
+  fetch(api, { headers: { "Accept": "application/vnd.github+json" } })
+    .then(function (r) { return r.json(); })
+    .then(function (release) {
+      if (done) return;
+      var assets = release.assets || [];
+      var apk = assets.filter(function (a) { return /^RipTvPremium(-[0-9.]+)?\.apk$/.test(a.name); })[0];
+      if (!apk) throw new Error("introuvable");
+      done = true;
+      var mo = Math.round(apk.size / 1048576);
+      status.textContent = "Le téléchargement de la dernière version (" + apk.name + ", environ " + mo + " Mo) démarre tout seul.";
+      link.href = apk.browser_download_url;
+      location.replace(apk.browser_download_url);
+    })
+    .catch(function () {
+      if (!done) { done = true; status.textContent = "Choisis le fichier RipTvPremium (sans « arm ») sur la page qui s'ouvre avec le bouton."; }
+    });
 </script>
 </body>
 </html>
