@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>RIptv · Connexion</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0 auto; max-width:30rem; padding:1.5rem 1.25rem 3rem;
+         font:18px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; text-align:center; }
+  h1 { font-size:1.4rem; margin:0 0 1rem; }
+  .code { font:700 2.2rem/1.2 ui-monospace,Consolas,monospace; letter-spacing:.08em; margin:.5rem 0 1rem;
+          padding:.8rem; border:2px dashed #0a6f6a; border-radius:12px; user-select:all; word-break:break-all; }
+  button, a.button { display:block; width:100%; box-sizing:border-box; margin:.8rem 0; padding:1rem; border:0; border-radius:12px;
+          background:#0a6f6a; color:#fff; font:700 1.1rem system-ui,sans-serif; text-decoration:none; cursor:pointer; }
+  a.button.google { background:#1a73e8; }
+  button:focus, a.button:focus { outline:4px solid #f3b765; outline-offset:3px; }
+  .ok { color:#0a8f3a; font-weight:700; min-height:1.6em; }
+  ol { text-align:left; padding-left:1.4rem; }
+  .note { opacity:.75; font-size:.9rem; }
+</style>
+</head>
+<body>
+<h1>Connecter RIptv à ton compte</h1>
+<p>Ton code&nbsp;:</p>
+<div class="code" id="code">—</div>
+<button id="copy" type="button">1. Copier le code</button>
+<div class="ok" id="ok"></div>
+<a class="button google" id="open" href="https://www.google.com/device">2. Ouvrir la page de connexion</a>
+<ol>
+  <li>Dans la page qui s'ouvre, <strong>appuie longuement</strong> sur la case « Saisir le code » puis <strong>« Coller »</strong>.</li>
+  <li><strong>Continuer</strong>, choisis ton compte, puis <strong>Autoriser</strong>.</li>
+  <li>RIptv se connecte tout seul sur l'écran où tu as scanné le QR code.</li>
+</ol>
+<p class="note">Le code n'est valable que quelques minutes. Il reste aussi affiché sur l'écran de RIptv.</p>
+<script>
+  // Code et page de connexion lus dans l'adresse (?c=ABCD-EFGH&s=google|trakt). Seules les pages officielles sont permises.
+  var p = new URLSearchParams(location.search);
+  var code = (p.get('c') || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+  var pages = { google: 'https://www.google.com/device', trakt: 'https://trakt.tv/activate' };
+  var page = pages[p.get('s')] || pages.google;
+  document.getElementById('code').textContent = code || '—';
+  document.getElementById('open').href = page;
+  function done() { document.getElementById('ok').textContent = 'Code copié ✓ — passe à l’étape 2'; }
+  document.getElementById('copy').onclick = function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done, fallback);
+    } else { fallback(); }
+  };
+  function fallback() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById('code'));
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    try { document.execCommand('copy'); done(); } catch (e) { document.getElementById('ok').textContent = 'Appuie longuement sur le code pour le copier.'; }
+  }
+</script>
+</body>
+</html>
