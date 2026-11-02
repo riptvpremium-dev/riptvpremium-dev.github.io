@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.riky.mediahub",
+      "sha256_cert_fingerprints": [
+        "19:A5:CE:58:4A:50:FB:5B:93:8A:93:AE:AC:82:14:91:6B:FA:C3:D0:41:58:F4:51:8C:F8:D1:1F:49:65:59:92"
+      ]
+    }
+  }
+]
