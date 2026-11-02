@@ -1,0 +1,2 @@
+# Le dossier .well-known (assetlinks.json : liens « Débloquer » ouverts dans RIptv) est ignoré par défaut.
+include: [".well-known"]
