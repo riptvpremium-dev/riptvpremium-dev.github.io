@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>RIptv · Déblocage</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0 auto; max-width:30rem; padding:1.5rem 1.25rem 3rem;
+         font:18px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; text-align:center; }
+  h1 { font-size:1.4rem; margin:0 0 1rem; }
+  a.button { display:block; width:100%; box-sizing:border-box; margin:.8rem 0; padding:1rem; border-radius:12px;
+          background:#0a6f6a; color:#fff; font:700 1.1rem system-ui,sans-serif; text-decoration:none; }
+  a.button.block { background:#b3261e; }
+  a.button:focus { outline:4px solid #f3b765; outline-offset:3px; }
+  .note { opacity:.75; font-size:.9rem; }
+</style>
+</head>
+<body>
+<h1 id="title">Demande RIptv</h1>
+<p id="what">Ouverture de la demande sur GitHub…</p>
+<a class="button" id="go" href="https://github.com/riptvpremium-dev/riptv-licences/issues">Ouvrir la demande sur GitHub</a>
+<p class="note">Sur le téléphone de l'administrateur, ce lien ouvre directement RIptv.</p>
+<script>
+  // Lien de l'e-mail : #a=DEBLOQUER|BLOQUER&h=<empreinte>&b=<infos de l'appareil>. Tout est après le « # » : rien
+  // n'est envoyé au serveur. Ici (PC, téléphone sans RIptv), on renvoie vers la demande toute prête sur GitHub.
+  var p = new URLSearchParams(location.hash.slice(1));
+  var a = p.get('a'), h = (p.get('h') || '').toLowerCase(), b = p.get('b') || '';
+  if ((a === 'DEBLOQUER' || a === 'BLOQUER') && /^[0-9a-f]{32}$/.test(h)) {
+    var url = 'https://github.com/riptvpremium-dev/riptv-licences/issues/new?title=' +
+      encodeURIComponent(a + ' ' + h) + '&body=' + encodeURIComponent(b.slice(0, 2000));
+    var go = document.getElementById('go');
+    go.href = url;
+    if (a === 'BLOQUER') go.className = 'button block';
+    document.getElementById('title').textContent = (a === 'DEBLOQUER' ? 'Débloquer' : 'Bloquer') +
+      ' l\'appareil ' + h.slice(0, 8).toUpperCase();
+    location.replace(url);
+  } else {
+    document.getElementById('what').textContent = 'Ce lien est incomplet.';
+  }
+</script>
+</body>
+</html>
