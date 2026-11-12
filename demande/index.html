@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>RIptv · Demande de déblocage</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0 auto; max-width:30rem; padding:1.5rem 1.25rem 3rem;
+         font:18px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; text-align:center; }
+  h1 { font-size:1.4rem; margin:0 0 1rem; }
+  .code { font:700 2.2rem/1.2 ui-monospace,Consolas,monospace; letter-spacing:.08em; margin:.5rem 0 1rem;
+          padding:.8rem; border:2px dashed #0a6f6a; border-radius:12px; user-select:all; word-break:break-all; }
+  button, a.button { display:block; width:100%; box-sizing:border-box; margin:.8rem 0; padding:1rem; border:0; border-radius:12px;
+          background:#0a6f6a; color:#fff; font:700 1.1rem system-ui,sans-serif; text-decoration:none; cursor:pointer; }
+  button:focus, a.button:focus { outline:4px solid #f3b765; outline-offset:3px; }
+  .ok { color:#0a8f3a; font-weight:700; min-height:1.6em; }
+  .note { opacity:.75; font-size:.9rem; }
+</style>
+</head>
+<body>
+<h1 id="title">Débloquer RIptv</h1>
+<p>Code de l'appareil&nbsp;:</p>
+<div class="code" id="code">—</div>
+<button id="copy" type="button">1. Copier le code</button>
+<div class="ok" id="ok"></div>
+<a class="button" id="go" href="#">2. Continuer la demande de déblocage</a>
+<p class="note" id="what">Ton application d'e-mail s'ouvre avec la demande déjà écrite : appuie sur Envoyer.
+  RIptv se débloque tout seul dès qu'elle est acceptée.</p>
+<script>
+  // Adresse lue du QR code de RIptv : #h=<empreinte>&i=<infos de l'appareil>. Tout est après le « # » : rien n'est
+  // envoyé au serveur. L'e-mail est le même que celui que RIptv écrit (TrialMode.requestMailto), toujours vers
+  // l'adresse de l'administrateur.
+  var TO = 'riptvpremium@gmail.com';
+  var UNLOCK = 'https://riptvpremium-dev.github.io/debloquer/';
+  var p = new URLSearchParams(location.hash.slice(1));
+  var h = (p.get('h') || '').toLowerCase(), infos = (p.get('i') || '').slice(0, 2000);
+  if (/^[0-9a-f]{32}$/.test(h)) {
+    var code = h.slice(0, 8).toUpperCase();
+    document.getElementById('code').textContent = code;
+    var name = '';
+    infos.split('\n').forEach(function (l) { if (l.indexOf('Appareil : ') === 0) name = l.slice(11).trim(); });
+    function link(a) { return UNLOCK + '#a=' + a + '&h=' + h + '&b=' + encodeURIComponent(infos); }
+    var body = 'Bonjour, je souhaite débloquer RIptv sur cet appareil.\n\n' + (infos ? infos + '\n' : '') +
+      'Empreinte : ' + h + '\n\n✅ Débloquer cet appareil :\n' + link('DEBLOQUER') +
+      '\n\n⛔ Bloquer cet appareil :\n' + link('BLOQUER') + '\n';
+    document.getElementById('go').href = 'mailto:' + TO + '?subject=' +
+      encodeURIComponent('Demande de déblocage RIptv — ' + (name || code)) + '&body=' + encodeURIComponent(body);
+    function done() { document.getElementById('ok').textContent = 'Code copié ✓ — passe à l’étape 2'; }
+    function fallback() {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById('code'));
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      try { document.execCommand('copy'); done(); } catch (e) { document.getElementById('ok').textContent = 'Appuie longuement sur le code pour le copier.'; }
+    }
+    document.getElementById('copy').onclick = function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, fallback);
+      else fallback();
+    };
+  } else {
+    document.getElementById('copy').style.display = 'none';
+    document.getElementById('go').style.display = 'none';
+    document.getElementById('what').textContent = 'Ce lien est incomplet : scanne à nouveau le QR code affiché par RIptv.';
+  }
+</script>
+</body>
+</html>
